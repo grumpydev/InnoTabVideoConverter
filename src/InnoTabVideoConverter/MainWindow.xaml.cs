@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using System.Windows;
@@ -56,7 +57,7 @@
                              {
                                  FileName = video.Title,
                                  DefaultExt = video.VideoExtension,
-                                 Filter = string.Format("Video Files ({0})|*{0}", video.VideoExtension), 
+                                 Filter = string.Format("Video Files ({0})|*{0}", video.VideoExtension),
                                  OverwritePrompt = true,
                                  CheckPathExists = true
                              };
@@ -86,6 +87,51 @@
             var infos = videoInfos.Where(vi => vi.VideoType == VideoType.WebM && vi.Resolution <= 480).OrderByDescending(vi => vi.Resolution).ToArray();
 
             return infos.FirstOrDefault();
+        }
+
+        private void BrowseButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Dispatcher.InvokeAsync(async () => await this.Browse());
+        }
+
+        private async Task Browse()
+        {
+            var dialog = new OpenFileDialog
+                             {
+                                 AddExtension = true,
+                                 CheckFileExists = true,
+                                 Filter = "Video Files(*.AVI;*.MP4;*.MPG;*.MPEG;*.WEBM;*.MKV)|*.AVI;*.MP4;*.MPG;*.MPEG;*.WEBM;*.MKV|All files (*.*)|*.*"
+                             };
+
+            var result = dialog.ShowDialog(this);
+
+            if (result == true)
+            {
+                this.InputVideoFilename.Text = dialog.FileName;
+            }
+        }
+
+        private void ConvertButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Dispatcher.InvokeAsync(async () => await this.Convert(this.InputVideoFilename.Text));
+        }
+
+        private async Task Convert(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
+            {
+                await this.ShowMessageAsync(
+                            "Filename",
+                            "Please select a valid file..");
+
+                return;
+            }
+
+            this.BusyGrid.Visibility = Visibility.Visible;
+
+            await Task.Delay(5000);
+
+            this.BusyGrid.Visibility = Visibility.Hidden;
         }
     }
 }

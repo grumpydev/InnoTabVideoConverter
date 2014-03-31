@@ -16,12 +16,28 @@
             </TabItem>
             <TabItem x:Name="ConverterTab" Header="Video Converter" IsSelected="True">
                 <Grid>
-                    <TextBox x:Name="InputVideoFilename"/>
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                        <TextBlock>Filename:</TextBlock>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="32"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox x:Name="InputVideoFilename"/>
+                            <Button Grid.Column="1" x:Name="BrowseButton" Click="BrowseButton_OnClick">...</Button>
+                        </Grid>
+                        <Button x:Name="ConvertButton" Click="ConvertButton_OnClick">Convert</Button>
+                    </StackPanel>
                 </Grid>
             </TabItem>
             <TabItem Header="About">
                 <Grid Background="Red"></Grid>
             </TabItem>
         </TabControl>
+        
+        <Grid x:Name="BusyGrid" Visibility="Hidden" Background="Transparent">
+            <controls:ProgressRing Foreground="{DynamicResource AccentColorBrush}"/>
+        </Grid>
     </Grid>
 </controls:MetroWindow>
