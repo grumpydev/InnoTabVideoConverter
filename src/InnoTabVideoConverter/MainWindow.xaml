@@ -1,0 +1,27 @@
+﻿<controls:MetroWindow x:Class="InnoTabVideoConverter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="InnoTab3 Video Converter" Height="350" Width="600">
+    <Grid>
+        <TabControl>
+            <TabItem Header="YouTube Downloader">
+                <Grid>
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                        <TextBlock>Enter Url:</TextBlock>
+                        <TextBox x:Name="UrlBox"></TextBox>
+                        <Button x:Name="DownloadButton" Click="DownloadButton_OnClick">Download</Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="ConverterTab" Header="Video Converter" IsSelected="True">
+                <Grid>
+                    <TextBox x:Name="InputVideoFilename"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="About">
+                <Grid Background="Red"></Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</controls:MetroWindow>
