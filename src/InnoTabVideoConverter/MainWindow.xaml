@@ -36,8 +36,9 @@
             </TabItem>
         </TabControl>
         
-        <Grid x:Name="BusyGrid" Visibility="Hidden" Background="Transparent">
-            <controls:ProgressRing Foreground="{DynamicResource AccentColorBrush}"/>
+        <Grid x:Name="BusyGrid" Visibility="Hidden">
+            <Grid Background="Black" Opacity="0.2"/>
+            <controls:ProgressRing Foreground="CadetBlue" IsActive="True"/>
         </Grid>
     </Grid>
 </controls:MetroWindow>

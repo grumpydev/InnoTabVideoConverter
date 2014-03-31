@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -19,6 +21,8 @@
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private const string ffmpegParameters = "-y -i \"{0}\" -vcodec libx264 -profile:v baseline -b:v 600k -r 24 -s 480x272 -aspect 16:9 -acodec libmp3lame -af volume=1 -b:a 96k -ar 22050 \"{1}\"";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -84,7 +88,7 @@
 
         private static VideoInfo SelectBestMatch(IEnumerable<VideoInfo> videoInfos)
         {
-            var infos = videoInfos.Where(vi => vi.VideoType == VideoType.WebM && vi.Resolution <= 480).OrderByDescending(vi => vi.Resolution).ToArray();
+            var infos = videoInfos.Where(vi => vi.VideoType == VideoType.Flash && vi.Resolution <= 480).OrderByDescending(vi => vi.Resolution).ToArray();
 
             return infos.FirstOrDefault();
         }
@@ -127,11 +131,66 @@
                 return;
             }
 
-            this.BusyGrid.Visibility = Visibility.Visible;
+            this.Dispatcher.Invoke(() => this.BusyGrid.Visibility = Visibility.Visible);
 
-            await Task.Delay(5000);
+            var exitCode = -1;
+            try
+            {
+                var destinationFilename = Path.Combine(
+                    Path.GetDirectoryName(filename),
+                    Path.GetFileNameWithoutExtension(filename) + "-converted" + Path.GetExtension(filename));
 
-            this.BusyGrid.Visibility = Visibility.Hidden;
+                var ffmpeg = new Process
+                                 {
+                                     StartInfo =
+                                         {
+                                             FileName = ConfigurationManager.AppSettings["ffmpeg-path"],
+                                             Arguments =
+                                                 string.Format(
+                                                     ffmpegParameters,
+                                                     filename,
+                                                     destinationFilename),
+                                             UseShellExecute = false,
+                                             RedirectStandardOutput = true,
+                                             RedirectStandardError = true,
+                                             WindowStyle = ProcessWindowStyle.Hidden
+                                         }
+                                 };
+                ffmpeg.Start();
+
+                ffmpeg.WaitForExit();
+
+                var output = ffmpeg.StandardOutput.ReadToEnd();
+                var errors = ffmpeg.StandardError.ReadToEnd();
+
+                using (var log = File.CreateText(Path.ChangeExtension(filename, "log")))
+                {
+                    log.WriteLine("Commandline: {0} {1}", ffmpeg.StartInfo.FileName, ffmpeg.StartInfo.Arguments);
+                    log.WriteLine("** Output:");
+                    log.Write(output);
+                    log.WriteLine("** Errors:");
+                    log.Write(errors);
+                }
+
+                exitCode = ffmpeg.ExitCode;
+            }
+            catch
+            {
+            }
+            finally
+            {
+                this.Dispatcher.Invoke(() => this.BusyGrid.Visibility = Visibility.Hidden);
+            }
+
+
+            if (exitCode == 0)
+            {
+                await this.ShowMessageAsync("Conversion", "Conversion completely sucessfully.");
+            }
+            else
+            {
+                await this.ShowMessageAsync("Conversion", "Conversion failed - see log for more information.");
+            }
         }
     }
 }
