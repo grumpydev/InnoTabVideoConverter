@@ -60,6 +60,8 @@
                 return;
             }
 
+            var defaultFilename = this.CleanFilename(video.Title);
+
             var dialog = new SaveFileDialog
                              {
                                  FileName = video.Title,
@@ -87,6 +89,19 @@
 
                 this.ConverterTab.IsSelected = true;
             }
+        }
+
+        private string CleanFilename(string title)
+        {
+            var invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var cleaned = title;
+
+            foreach (var c in invalid)
+            {
+                cleaned = cleaned.Replace(c.ToString(), "");
+            }
+
+            return cleaned;
         }
 
         private static VideoInfo SelectBestMatch(IEnumerable<VideoInfo> videoInfos)
