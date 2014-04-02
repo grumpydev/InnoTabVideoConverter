@@ -10,6 +10,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Navigation;
 
     using MahApps.Metro.Controls;
     using MahApps.Metro.Controls.Dialogs;
@@ -133,6 +134,15 @@
                 return;
             }
 
+            if (!File.Exists(ConfigurationManager.AppSettings["ffmpeg-path"]))
+            {
+                await this.ShowMessageAsync(
+                    "FFMpeg",
+                    "Unable to load ffmpeg, please make sure you have placed it in the correct location.\n\nSee ffmpeg.txt in the ffmpeg folder for more information.");
+
+                return;
+            }
+
             this.BusyGrid.Visibility = Visibility.Visible;
 
             Task.Run(
@@ -217,6 +227,12 @@
                             });
                     }
                 });
+        }
+
+        private void OpenUrl(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

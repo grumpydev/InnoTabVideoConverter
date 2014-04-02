@@ -1,0 +1,9 @@
+﻿This application requires that ffmpeg.exe be present in this folder in order to convert videos.
+
+You can download the latest version from here:
+
+http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-latest-win32-static.7z
+
+You will need 7zip to extract it:
+
+http://7-zip.org/

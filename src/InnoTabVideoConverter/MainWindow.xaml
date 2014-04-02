@@ -3,6 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="InnoTab3 Video Converter" Height="350" Width="600" ResizeMode="NoResize">
+    <controls:MetroWindow.Resources>
+        <Style x:Key="AboutTextTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style x:Key="AboutTextMain" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </controls:MetroWindow.Resources>
     <Grid>
         <TabControl>
             <TabItem Header="YouTube Downloader">
@@ -23,7 +35,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="32"/>
                             </Grid.ColumnDefinitions>
-                            
+
                             <TextBox x:Name="InputVideoFilename"/>
                             <Button Grid.Column="1" x:Name="BrowseButton" Click="BrowseButton_OnClick">...</Button>
                         </Grid>
@@ -32,10 +44,39 @@
                 </Grid>
             </TabItem>
             <TabItem Header="About">
-                <Grid Background="Red"></Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="7*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical" Margin="6,6,6,6">
+                        <TextBlock Style="{StaticResource AboutTextTitle}">InnoTab Video Converter</TextBlock>
+                        <TextBlock>Copyright (c) Steven Robbins</TextBlock>
+                        <TextBlock/>
+                        <TextBlock Style="{StaticResource AboutTextMain}">Also uses the following:</TextBlock>
+                        <TextBlock/>
+                        <TextBlock Style="{StaticResource AboutTextMain}"><Hyperlink NavigateUri="https://github.com/flagbug/YoutubeExtractor" RequestNavigate="OpenUrl">YouTubeExtractor</Hyperlink></TextBlock>
+                        <TextBlock Style="{StaticResource AboutTextMain}"><Hyperlink NavigateUri="http://mahapps.com/" RequestNavigate="OpenUrl">MahApps.Metro</Hyperlink></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Vertical" Margin="6,6,6,6">
+                        <TextBlock Style="{StaticResource AboutTextTitle}">Instructions</TextBlock>
+                        <TextBlock/>
+                        <TextBlock Style="{StaticResource AboutTextMain}">1. Ensure that FFMpeg has been copied to the ffmpeg directory. (*)</TextBlock>
+                        <TextBlock Style="{StaticResource AboutTextMain}">2. For YouTube videos, copy and paste the URL into the "YouTube Downloader" tab, click download and select a place to save it. A progress bar will show the download progress. Skip to step 4.</TextBlock>
+                        <TextBlock Style="{StaticResource AboutTextMain}">3. Click the "..." button on the "Video Converter" tab and select a file to convert.</TextBlock>
+                        <TextBlock Style="{StaticResource AboutTextMain}">4. Click the Convert button and wait - this could take a while.</TextBlock>
+                        <TextBlock Style="{StaticResource AboutTextMain}">5. Done! The converted file will be in the same directory as the source file with "-converted" in the filename.</TextBlock>
+                        <TextBlock/>
+                        <TextBlock Style="{StaticResource AboutTextMain}">(*) for more information see ffmpeg.txt inside the ffmpeg folder.</TextBlock>
+
+
+                    </StackPanel>
+                </Grid>
             </TabItem>
         </TabControl>
-        
+
         <Grid x:Name="BusyGrid" Visibility="Hidden">
             <Grid Background="Black" Opacity="0.2"/>
             <controls:ProgressRing Foreground="CadetBlue" IsActive="True"/>
