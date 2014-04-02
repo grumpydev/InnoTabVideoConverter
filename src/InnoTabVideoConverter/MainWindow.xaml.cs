@@ -6,6 +6,8 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
 
@@ -131,66 +133,90 @@
                 return;
             }
 
-            this.Dispatcher.Invoke(() => this.BusyGrid.Visibility = Visibility.Visible);
+            this.BusyGrid.Visibility = Visibility.Visible;
 
-            var exitCode = -1;
-            try
-            {
-                var destinationFilename = Path.Combine(
-                    Path.GetDirectoryName(filename),
-                    Path.GetFileNameWithoutExtension(filename) + "-converted" + Path.GetExtension(filename));
-
-                var ffmpeg = new Process
-                                 {
-                                     StartInfo =
-                                         {
-                                             FileName = ConfigurationManager.AppSettings["ffmpeg-path"],
-                                             Arguments =
-                                                 string.Format(
-                                                     ffmpegParameters,
-                                                     filename,
-                                                     destinationFilename),
-                                             UseShellExecute = false,
-                                             RedirectStandardOutput = true,
-                                             RedirectStandardError = true,
-                                             WindowStyle = ProcessWindowStyle.Hidden
-                                         }
-                                 };
-                ffmpeg.Start();
-
-                ffmpeg.WaitForExit();
-
-                var output = ffmpeg.StandardOutput.ReadToEnd();
-                var errors = ffmpeg.StandardError.ReadToEnd();
-
-                using (var log = File.CreateText(Path.ChangeExtension(filename, "log")))
+            Task.Run(
+                async () =>
                 {
-                    log.WriteLine("Commandline: {0} {1}", ffmpeg.StartInfo.FileName, ffmpeg.StartInfo.Arguments);
-                    log.WriteLine("** Output:");
-                    log.Write(output);
-                    log.WriteLine("** Errors:");
-                    log.Write(errors);
-                }
+                    var exitCode = -1;
+                    var logFile = string.Empty;
+                    try
+                    {
+                        var destinationFilename = Path.Combine(
+                            Path.GetDirectoryName(filename),
+                            Path.GetFileNameWithoutExtension(filename) + "-converted" + ".avi");
 
-                exitCode = ffmpeg.ExitCode;
-            }
-            catch
-            {
-            }
-            finally
-            {
-                this.Dispatcher.Invoke(() => this.BusyGrid.Visibility = Visibility.Hidden);
-            }
+                        var arguments = string.Format(ffmpegParameters, filename, destinationFilename);
 
+                        var outputBuilder = new StringBuilder();
+                        var errorBuilder = new StringBuilder();
 
-            if (exitCode == 0)
-            {
-                await this.ShowMessageAsync("Conversion", "Conversion completely sucessfully.");
-            }
-            else
-            {
-                await this.ShowMessageAsync("Conversion", "Conversion failed - see log for more information.");
-            }
+                        var ffmpeg = new Process
+                                         {
+                                             StartInfo =
+                                                 {
+                                                     FileName =
+                                                         ConfigurationManager.AppSettings["ffmpeg-path"],
+                                                     Arguments = arguments,
+                                                     UseShellExecute = false,
+                                                     RedirectStandardOutput = true,
+                                                     RedirectStandardError = true,
+                                                     WindowStyle = ProcessWindowStyle.Hidden
+                                                 }
+                                         };
+
+                        using (ffmpeg)
+                        {
+                            ffmpeg.OutputDataReceived += (sender, e) => outputBuilder.AppendLine(e.Data);
+                            ffmpeg.ErrorDataReceived += (sender, e) => errorBuilder.AppendLine(e.Data);
+
+                            ffmpeg.Start();
+
+                            ffmpeg.BeginOutputReadLine();
+                            ffmpeg.BeginErrorReadLine();
+
+                            ffmpeg.WaitForExit();
+
+                            exitCode = ffmpeg.ExitCode;
+                        }
+
+                        logFile = Path.ChangeExtension(filename, "log");
+                        using (var log = File.CreateText(logFile))
+                        {
+                            log.WriteLine(
+                                "Commandline: {0} {1}",
+                                ConfigurationManager.AppSettings["ffmpeg-path"],
+                                arguments);
+                            log.WriteLine("** Output:");
+                            log.Write(errorBuilder.ToString()); // ffmpeg only uses stderr - feck knows why
+                        }
+                    }
+                    catch
+                    {
+                    }
+                    finally
+                    {
+                        this.Dispatcher.Invoke(() => this.BusyGrid.Visibility = Visibility.Hidden);
+                    }
+
+                    if (exitCode == 0)
+                    {
+                        this.Dispatcher.InvokeAsync(async () => await this.ShowMessageAsync("Conversion", "Conversion completely sucessfully."));
+                    }
+                    else
+                    {
+                        this.Dispatcher.InvokeAsync(
+                            async () =>
+                            {
+                                await
+                                    this.ShowMessageAsync(
+                                        "Conversion",
+                                        "Conversion failed - see log for more information.");
+
+                                Process.Start(logFile);
+                            });
+                    }
+                });
         }
     }
 }
