@@ -90,7 +90,7 @@
 
         private static VideoInfo SelectBestMatch(IEnumerable<VideoInfo> videoInfos)
         {
-            var infos = videoInfos.Where(vi => vi.VideoType == VideoType.Flash && vi.Resolution <= 480).OrderByDescending(vi => vi.Resolution).ToArray();
+            var infos = videoInfos.Where(vi => vi.VideoType == VideoType.WebM && vi.Resolution <= 480).OrderByDescending(vi => vi.Resolution).ToArray();
 
             return infos.FirstOrDefault();
         }
@@ -161,7 +161,7 @@
                                                      UseShellExecute = false,
                                                      RedirectStandardOutput = true,
                                                      RedirectStandardError = true,
-                                                     WindowStyle = ProcessWindowStyle.Hidden
+                                                     CreateNoWindow = true,
                                                  }
                                          };
 
