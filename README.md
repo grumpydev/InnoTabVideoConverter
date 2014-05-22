@@ -4,4 +4,4 @@
  
  Requires FFMPeg - more information can be found in the ffmpeg.txt file in the ffmpeg directory.
  
- Binary version can be downloaded from (Here)[https://dl.dropboxusercontent.com/u/21341/InnoTabVideoConverter/InnoTabVideoConverter.zip]
+ Binary version can be downloaded from [Here](https://dl.dropboxusercontent.com/u/21341/InnoTabVideoConverter/InnoTabVideoConverter.zip)
